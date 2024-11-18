@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps: 
     - name: Checkout
@@ -26,16 +26,15 @@ jobs:
       working-directory: ./ContinuousDeployment
 
     - name: Test
-      run: dotnet test -c Release -f:net8.0-windows10.0.19041.0
+      run: dotnet test -c Release -f net8.0-windows10.0.19041.0
       working-directory: ./ContinuousDeployment
 
     - name: Publish
-      run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true
+      run: dotnet publish -c Release -f net8.0-windows10.0.19041.0 -r win10-x64 /p:GenerateAppxPackageOnBuild=true
       working-directory: ./ContinuousDeployment  
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: Build
-        path: ./ContinuousDeployment/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/**/*.msix
-
+        path: ./ContinuousDeployment/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/*.msix
