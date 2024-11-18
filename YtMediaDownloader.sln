@@ -5,7 +5,7 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GUI", "GUI\GUI.csproj", "{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YtLibrary", "YtLibrary\YtLibrary.csproj", "{35659476-F2AF-4D21-A4E7-1374D9CE6107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YtLibrary", "YtLibrary\YtLibrary.csproj", "{35659476-F2AF-4D21-A4E7-1374D9CE6107}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
