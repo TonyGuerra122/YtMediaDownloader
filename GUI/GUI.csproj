@@ -22,10 +22,10 @@
         <Nullable>enable</Nullable>
 
         <!-- Display name -->
-        <ApplicationTitle>GUI</ApplicationTitle>
+        <ApplicationTitle>YtMediaDownloader</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.gui</ApplicationId>
+        <ApplicationId>com.tonyguerra122.ytmediadownloader</ApplicationId>
 
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
