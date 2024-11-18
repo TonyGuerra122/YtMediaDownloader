@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Install MAUI Workload
+      run: dotnet workload install maui
+
+    - name: Restore
+      run: dotnet restore
+      working-directory: ./GUI
+
+    - name: Build
+      run: dotnet build -c Release -f:net8.0-windows10.0.19041.0
+      working-directory: ./GUI
+    
+    - name: Decode Signing Certificate
+      run: |
+        echo "${{ secrets.SIGNING_CERTIFICATE_BASE_64_CONTENT }}" > cert.asc
+        certutil -decode cert.asc cert.pfx
+
+    - name: Install Signing Certificate
+      run: certutil -user -p ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
+
+    - name: Publish
+      run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumprint=${{ secrets.SIGNING_CERTIFICATE_THUMBPRINT }}
+      working-directory: ./GUI  
+
+    - name: Upload
+      uses: actions/upload-artifact@v4
+      with:
+        name: Build
+        path: ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/**/*.msix
