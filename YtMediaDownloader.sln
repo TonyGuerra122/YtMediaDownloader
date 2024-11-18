@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GUI", "GUI\GUI.csproj", "{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YtLibrary", "YtLibrary\YtLibrary.csproj", "{35659476-F2AF-4D21-A4E7-1374D9CE6107}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BF3EE48-A62B-40FF-84E5-2A32E55F81A5}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {727E2A2A-F83F-4A8A-A80E-2B81B712FC19}
+	EndGlobalSection
+EndGlobal

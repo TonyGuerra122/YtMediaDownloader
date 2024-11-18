@@ -1,0 +1,210 @@
+﻿@page "/"
+
+@inject YtDownloader _ytDowloader
+
+<div class="card">
+	<div class="card-header bg-primary text-white">
+		<h1>Bem-Vindo ao YtMediaDownloader</h1>
+	</div>
+	<div class="card-body bg-gradient">
+		<div class="search-container">
+			<input type="text"
+				   @bind="_videoUrl"
+				   placeholder="Cole o link do vídeo do YouTube"
+				   class="search-input" />
+			<button @onclick="SearchVideo" class="search-button">Pesquisar</button>
+		</div>
+		<div id="videoPreview" class="video-preview">
+			@if (!string.IsNullOrEmpty(_thumbnailUrl))
+			{
+				<img src="@_thumbnailUrl" alt="Thumbnail do Vídeo" />
+
+				<!-- Exibir Título, Duração e Autor do Vídeo -->
+				<div class="video-info">
+					<p><strong>Título:</strong> @_videoTitle</p>
+					<p><strong>Duração:</strong> @_videoDuration</p>
+					<p><strong>Autor:</strong> @_videoAuthor</p>
+				</div>
+
+				<div class="download-options">
+					<button @onclick="DownloadVideo" class="download-button">Baixar Vídeo</button>
+					<button @onclick="DownloadAudio" class="download-button">Baixar Áudio</button>
+				</div>
+			}
+			else
+			{
+				<p class="placeholder-text">A miniatura do vídeo aparecerá aqui.</p>
+			}
+		</div>
+	</div>
+</div>
+
+@code {
+	private string _videoUrl = string.Empty;
+	private string _thumbnailUrl = string.Empty;
+	private string _videoTitle = string.Empty;
+	private string _videoDuration = string.Empty;
+	private string _videoAuthor = string.Empty;
+
+	private async Task SearchVideo()
+	{
+		if (string.IsNullOrWhiteSpace(_videoUrl)) return;
+
+		try
+		{
+			var videoInfo = await _ytDowloader.GetVideoInfo(_videoUrl);
+			_thumbnailUrl = videoInfo.ThumbUrl;
+			_videoTitle = videoInfo.Title;
+			_videoDuration = videoInfo.Duration.ToString();
+			_videoAuthor = videoInfo.Author;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Erro ao buscar vídeo: {ex.Message}");
+			_thumbnailUrl = string.Empty;
+			_videoTitle = _videoDuration = _videoAuthor = string.Empty;
+		}
+	}
+
+	private async Task DownloadVideo()
+	{
+		try
+		{
+			_toastService.ShowInfo("O Download está sendo realizado");
+			var downloadPath = await Task.Run(async () =>
+			{
+				return await _ytDowloader.DownloadMediaAsync(_videoUrl, PathHelper.GetMediaFolder(), MediaType.VIDEO);
+			});
+
+			_toastService.ShowSuccess("O Download foi realizado com sucesso");
+
+			await FileHelper.OpenFileAsync(downloadPath);
+		}
+		catch (Exception)
+		{
+			_toastService.ShowError("Ocorreu um erro ao realizar o download");
+		}
+	}
+
+	private async Task DownloadAudio()
+	{
+		try
+		{
+			var downloadPath = await Task.Run(async () =>
+			{
+				return await _ytDowloader.DownloadMediaAsync(_videoUrl, PathHelper.GetMediaFolder(), MediaType.AUDIO);
+			}); 
+
+			_toastService.ShowSuccess("O Download foi realizado com sucesso");
+
+			await FileHelper.OpenFileAsync(downloadPath);
+		}
+		catch (Exception)
+		{
+			_toastService.ShowError("Ocorreu um erro ao realizar o download");
+		}
+	}
+}
+
+<!-- #region style -->
+<style>
+	.card {
+		width: 100%;
+		max-width: 600px;
+		margin: 50px auto;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		border-radius: 10px;
+		overflow: hidden;
+	}
+
+	.card-header {
+		padding: 15px;
+		text-align: center;
+	}
+
+	.card-body {
+		padding: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	.search-container {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.search-input {
+		flex: 1;
+		min-width: 200px;
+		padding: 10px;
+		border: 1px solid #ccc;
+		border-radius: 5px;
+	}
+
+	.search-button {
+		padding: 10px 20px;
+		background-color: #007bff;
+		color: #fff;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+		.search-button:hover {
+			background-color: #0056b3;
+		}
+
+	.video-preview {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		gap: 10px;
+		height: auto;
+		border: 1px dashed #ccc;
+		border-radius: 10px;
+		background-color: #f9f9f9;
+		padding: 10px;
+	}
+
+		.video-preview img {
+			max-width: 100%;
+			height: auto;
+			border-radius: 10px;
+		}
+
+	.video-info {
+		text-align: center;
+		padding: 10px;
+	}
+
+	.download-options {
+		display: flex;
+		gap: 10px;
+		flex-wrap: wrap;
+	}
+
+	.download-button {
+		padding: 10px 20px;
+		background-color: #28a745;
+		color: #fff;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s;
+	}
+
+		.download-button:hover {
+			background-color: #218838;
+		}
+
+	.placeholder-text {
+		color: #999;
+		text-align: center;
+	}
+
+</style>
+<!-- #endregion -->
