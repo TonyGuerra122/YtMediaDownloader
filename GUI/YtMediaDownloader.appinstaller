@@ -1,4 +1,4 @@
-?<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <AppInstaller xmlns="http://schemas.microsoft.com/appx/appinstaller/2018" Version="1.0.0.0" Uri="https://github.com/TonyGuerra122/YtMediaDownloader/releases/latest/download/YtMediaDownloader.appinstaller">
 	<MainPackage Name="com.tonyguerra122.ytmediadownloader" Publisher="CN=TonyGuerra" Version="0.0.1.1" ProcessorArchitecture="x64" Uri="https://github.com/TonyGuerra122/YtMediaDownloader/releases/latest/download/AutoUpdate.msix" />
 	<UpdateSettings>
