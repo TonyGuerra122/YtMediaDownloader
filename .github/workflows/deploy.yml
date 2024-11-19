@@ -38,11 +38,58 @@ jobs:
       run: certutil -user -p ${{ secrets.SIGNING_CERTIFICATE_PASSWORD }} -Silent -importpfx cert.pfx NoRoot
 
     - name: Publish
-      run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumprint=${{ secrets.SIGNING_CERTIFICATE_THUMBPRINT }}
+      run: dotnet publish -c Release -f:net8.0-windows10.0.19041.0 /p:GenerateAppxPackageOnBuild=true /p:AppxPackageSigningEnabled=true /p:PackageCertificateThumbprint=${{ secrets.SIGNING_CERTIFICATE_THUMBPRINT }}
       working-directory: ./GUI  
+
+      - name: Extract Version
+      id: extractVersion
+      shell: pwsh
+      run: |
+        $xml = [xml] (Get-Content './GUI/GUI.csproj')
+        [string] $version = $xml.Project.PropertyGroup.ApplicationDisplayVersion
+        echo "version=$version" >> $env:GITHUB_ENV
+
+    - name: Create Tag
+      uses: actions/github-script@v5
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          github.rest.git.createRef({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            sha: context.sha,
+            ref: 'refs/tags/v${{ env.version }}'
+          })
+
+    - name: Rename Auto-Update Installer
+      shell: pwsh
+      run: Rename-Item ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/GUI_${{ env.version }}.1_x64.msix AutoUpdate.msix
+
+    - name: Rename Certificate
+      shell: pwsh
+      run: Rename-Item ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/GUI_${{ env.version }}.1_x64.cer TonyGuerra.cer
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ env.version }}
+        files: |
+          ./GUI/YtMediaDownloader.appinstaller
+          ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/AutoUpdate.msix
+          ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/TonyGuerra.cer
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Prepare Build Artifacts in a Single Directory
+      run: |
+        mkdir -p ./build-artifacts
+        cp ./GUI/YtMediaDownloader.appinstaller ./build-artifacts/
+        cp ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/AutoUpdate.msix ./build-artifacts/
+        cp ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/GUI_${{ env.version }}.1_Test/TonyGuerra.cer ./build-artifacts/
 
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: Build
-        path: ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/**/*.msix
+        path: | 
+          ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/**/*.msix
+          ./GUI/bin/Release/net8.0-windows10.0.19041.0/win10-x64/AppPackages/**/*.cer
