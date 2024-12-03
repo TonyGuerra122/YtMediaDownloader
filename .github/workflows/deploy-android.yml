@@ -1,0 +1,44 @@
+name: Build and Deploy Android
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  build-android:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install MAUI Workload
+        run: dotnet workload install maui
+
+      - name: Restore Dependencies
+        run: dotnet restore
+        working-directory: ./GUI
+
+      - name: Build Android APK
+        run: dotnet publish -c Release -f net8.0-android
+        working-directory: ./GUI
+
+      - name: Prepare Build Artifacts
+        run: |
+          mkdir -p ./build-artifacts
+          cp ./GUI/bin/Release/net8.0-android/publish/*.apk ./build-artifacts/YtMediaDownloader.apk
+
+      - name: Upload Build Artifacts to GitHub
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-build
+          path: ./build-artifacts/*
