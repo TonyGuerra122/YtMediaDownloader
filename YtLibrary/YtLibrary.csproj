@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net8.0-windows10.0.19041.0;net8.0-android</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="YoutubeExplode" Version="6.4.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="YoutubeExplode" Version="6.4.3" />
+	</ItemGroup>
 
 </Project>

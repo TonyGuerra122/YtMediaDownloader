@@ -42,7 +42,7 @@
 
     <ItemGroup>
         <!-- App Icon -->
-		<MauiIcon Include="Resources\AppIcon\icon.svg" />
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" />
 
 		<!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
@@ -68,6 +68,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\YtLibrary\YtLibrary.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Platforms\Android\Resources\NovaPasta\" />
     </ItemGroup>
 
 </Project>
