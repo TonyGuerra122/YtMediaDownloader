@@ -78,9 +78,9 @@
 
 			await FileHelper.OpenFileAsync(downloadPath);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			_toastService.ShowError("Ocorreu um erro ao realizar o download");
+			_toastService.ShowError($"Ocorreu um erro ao realizar o download {ex.Message}");
 		}
 	}
 

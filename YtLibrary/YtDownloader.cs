@@ -8,7 +8,7 @@ namespace YtLibrary;
 
 public class YtDownloader(string binFolder)
 {
-	private readonly FFmpegService _ffmpegService = new(Path.Combine(binFolder, "ffmpeg"));
+	private readonly FFmpegService _ffmpegService = new(binFolder);
 
 	private readonly YoutubeClient _youtubeClient = new();
 

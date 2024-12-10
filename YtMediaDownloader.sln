@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GUI", "GUI\GUI.csproj", "{0
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YtLibrary", "YtLibrary\YtLibrary.csproj", "{35659476-F2AF-4D21-A4E7-1374D9CE6107}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFmpegLibrary", "FfmegLibrary\FFmpegLibrary.csproj", "{49E8FE08-F955-480B-B7DF-88205E62D9A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +25,10 @@ Global
 		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35659476-F2AF-4D21-A4E7-1374D9CE6107}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49E8FE08-F955-480B-B7DF-88205E62D9A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49E8FE08-F955-480B-B7DF-88205E62D9A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49E8FE08-F955-480B-B7DF-88205E62D9A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49E8FE08-F955-480B-B7DF-88205E62D9A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

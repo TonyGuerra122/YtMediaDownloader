@@ -3,25 +3,37 @@ using System.Diagnostics;
 
 namespace FFmpegLibrary;
 
-public class FFmpegService(string ffmpegFolder)
+public class FFmpegService
 {
-	private readonly string _ffmpegFolder = ffmpegFolder;
-	private readonly string _ffmpegPath = Path.Combine(ffmpegFolder, "ffmpeg.exe");
+	private readonly string _binariesFolder;
+	private readonly string _ffmpegFolder;
+	private readonly string _ffmpegPath;
+
+	public FFmpegService(string binariesFolder)
+	{
+		_binariesFolder = binariesFolder;
+		_ffmpegFolder = Path.Combine(binariesFolder, "ffmpeg");
+		_ffmpegPath = Path.Combine(_ffmpegFolder, "ffmpeg.exe");
+	}
 
 	public async Task JoinStreamsToFile(Stream videoStream, Stream audioStream, string outputFile)
 	{
-		if (!FFmpegUtils.IsFfmpegPresent(_ffmpegFolder))
-			await FFmpegUtils.InstallFFmpeg(_ffmpegFolder);
+		string tempVideoPath = Path.Combine(_ffmpegFolder, "temp_video.mp4");
+		string tempAudioPath = Path.Combine(_ffmpegFolder, "temp_audio.aac");
 
 		try
 		{
+			if (!FFmpegUtils.IsFfmpegPresent(_ffmpegPath)) await FFmpegUtils.InstallFFmpeg(_binariesFolder);
+
+			await SaveStreamToFile(videoStream, tempVideoPath);
+			await SaveStreamToFile(audioStream, tempAudioPath);
+
 			var process = new Process
 			{
 				StartInfo = new ProcessStartInfo
 				{
 					FileName = _ffmpegPath,
-					Arguments = $"-y -i pipe:0 -i pipe:1 -c:v copy -c:a aac {outputFile}",
-					RedirectStandardInput = true,
+					Arguments = $"-y -loglevel debug -i \"{tempVideoPath}\" -i \"{tempAudioPath}\" -c:v copy -c:a aac \"{outputFile}\"",
 					RedirectStandardError = true,
 					UseShellExecute = false,
 					CreateNoWindow = true
@@ -30,24 +42,33 @@ public class FFmpegService(string ffmpegFolder)
 
 			process.Start();
 
-			var inputStream = process.StandardInput.BaseStream;
-			var videoTask = videoStream.CopyToAsync(inputStream);
-			var audioTask = audioStream.CopyToAsync(inputStream);
-
-			await Task.WhenAll(videoTask, audioTask);
-
-			inputStream.Close();
-
 			string errorOutput = await process.StandardError.ReadToEndAsync();
 
 			process.WaitForExit();
 
 			if (process.ExitCode != 0)
-				throw new Exception($"Erro no FFmpeg: {errorOutput}");
+				throw new FFmpegException($"Erro no FFmpeg: {errorOutput}");
 		}
 		catch (Exception ex)
 		{
 			throw new FFmpegException($"Erro ao executar o FFmpeg: {ex.Message}");
 		}
+		finally
+		{
+			if (File.Exists(tempVideoPath))
+				File.Delete(tempVideoPath);
+
+			if (File.Exists(tempAudioPath))
+				File.Delete(tempAudioPath);
+
+			videoStream?.Dispose();
+			audioStream?.Dispose();
+		}
+	}
+
+	private static async Task SaveStreamToFile(Stream inputStream, string filePath)
+	{
+		await using var fileStream = File.Create(filePath);
+		await inputStream.CopyToAsync(fileStream);
 	}
 }
