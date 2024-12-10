@@ -1,53 +1,88 @@
-﻿using YoutubeExplode;
+﻿using FFmpegLibrary;
+using YoutubeExplode;
 using YoutubeExplode.Common;
+using YoutubeExplode.Videos;
 using YoutubeExplode.Videos.Streams;
 
 namespace YtLibrary;
 
-public class YtDownloader
+public class YtDownloader(string binFolder)
 {
-    private readonly YoutubeClient _youtubeClient = new();
+	private readonly FFmpegService _ffmpegService = new(Path.Combine(binFolder, "ffmpeg"));
 
-    public async Task<string> DownloadMediaAsync(string url, string filePath, MediaType mediaType)
-    {
-        try
-        {
-            var ytVideo = await _youtubeClient.Videos.GetAsync(url);
+	private readonly YoutubeClient _youtubeClient = new();
 
-            var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(url);
+	public async Task<string> DownloadMediaAsync(string url, string filePath, MediaType mediaType)
+	{
+		try
+		{
+			var ytVideo = await _youtubeClient.Videos.GetAsync(url);
 
-            var streamInfo = mediaType == MediaType.AUDIO
-                ? streamManifest.GetAudioStreams().GetWithHighestBitrate()
-                : streamManifest.GetVideoOnlyStreams()
-                    .Where(s => s.Container == Container.Mp4)
-                    .GetWithHighestVideoQuality();
+			var streamManifest = await _youtubeClient.Videos.Streams.GetManifestAsync(url);
 
-            string sanitizedTitle = string.Join("_", ytVideo.Title.Split(Path.GetInvalidFileNameChars()));
-            string filePathName = Path.Combine(filePath, $"{sanitizedTitle}.{streamInfo.Container}");
+			string filePathName = await WriteStreamToFile(streamManifest, mediaType, filePath, ytVideo);
 
-            await _youtubeClient.Videos.Streams.DownloadAsync(streamInfo, filePathName);
+			return filePathName;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Erro ao baixar mídia: {ex.Message}");
+			throw;
+		}
+	}
 
-            return filePathName;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao baixar mídia: {ex.Message}");
-            throw;
-        }
-    }
+	private async Task<string> WriteStreamToFile(StreamManifest streamManifest, MediaType mediaType, string filePath, Video video)
+	{
+		Stream? videoStream = null;
+		Stream? audioStream = null;
 
-    public async Task<VideoInfo> GetVideoInfo(string url)
-    {
-        var ytVideo = await _youtubeClient.Videos.GetAsync(url);
+		try
+		{
+			string fileExt = mediaType.Equals(MediaType.VIDEO) ? "mp4" : "mp3";
 
-        var highestThumbnail = ytVideo.Thumbnails.GetWithHighestResolution();
+			string sanitizedTitle = string.Join("_", video.Title.Split(Path.GetInvalidFileNameChars()));
+			string filePathName = Path.Combine(filePath, $"{sanitizedTitle}.{fileExt}");
 
-        return new VideoInfo(
-            ytVideo.Title,
-            ytVideo.Author.ChannelTitle,
-            ytVideo.Duration ?? TimeSpan.Zero,
-            highestThumbnail.Url
-        );
-    }
+			audioStream = await _youtubeClient.Videos.Streams.GetAsync(streamManifest.GetAudioStreams().GetWithHighestBitrate());
+
+			if (mediaType == MediaType.VIDEO)
+			{
+				videoStream = await _youtubeClient.Videos.Streams.GetAsync
+				(
+					streamManifest.GetVideoOnlyStreams()
+						.Where(s => s.Container == Container.Mp4)
+						.GetWithHighestVideoQuality()
+				);
+
+				await _ffmpegService.JoinStreamsToFile(videoStream, audioStream, filePathName);
+			}
+			else
+			{
+				await using var fileStream = File.Create(filePathName);
+				await audioStream.CopyToAsync(fileStream);
+			}
+
+			return filePathName;
+		}
+		finally
+		{
+			videoStream?.Dispose();
+			audioStream?.Dispose();	
+		}
+	}
+
+	public async Task<VideoInfo> GetVideoInfo(string url)
+	{
+		var ytVideo = await _youtubeClient.Videos.GetAsync(url);
+
+		var highestThumbnail = ytVideo.Thumbnails.GetWithHighestResolution();
+
+		return new VideoInfo(
+			ytVideo.Title,
+			ytVideo.Author.ChannelTitle,
+			ytVideo.Duration ?? TimeSpan.Zero,
+			highestThumbnail.Url
+		);
+	}
 
 }
