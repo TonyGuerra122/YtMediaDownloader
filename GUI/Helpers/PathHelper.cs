@@ -18,4 +18,13 @@ public static class PathHelper
 
         return videosPath;
     }
+
+    public static string GetBinariesFolder()
+    {
+        string binFolder = Path.Combine(GetMediaFolder(), "bin");
+
+        if (!Directory.Exists(binFolder)) Directory.CreateDirectory(binFolder);
+
+        return binFolder;
+	}
 }

@@ -1,7 +1,4 @@
 ﻿@page "/"
-
-@inject YtDownloader _ytDowloader
-
 <div class="card">
 	<div class="card-header bg-primary text-white">
 		<h1>Bem-Vindo ao YtMediaDownloader</h1>
@@ -45,6 +42,7 @@
 	private string _videoTitle = string.Empty;
 	private string _videoDuration = string.Empty;
 	private string _videoAuthor = string.Empty;
+	private YtDownloader _ytDowloader = new(PathHelper.GetBinariesFolder());
 
 	private async Task SearchVideo()
 	{
@@ -80,9 +78,9 @@
 
 			await FileHelper.OpenFileAsync(downloadPath);
 		}
-		catch (Exception)
+		catch (Exception ex)
 		{
-			_toastService.ShowError("Ocorreu um erro ao realizar o download");
+			_toastService.ShowError($"Ocorreu um erro ao realizar o download {ex.Message}");
 		}
 	}
 
