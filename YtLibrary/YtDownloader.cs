@@ -12,6 +12,7 @@ public class YtDownloader(string binFolder)
 
 	private readonly YoutubeClient _youtubeClient = new();
 
+	public bool IsFFmpegPresent() => _ffmpegService.IsFFmpegPresent();
 	public async Task<string> DownloadMediaAsync(string url, string filePath, MediaType mediaType)
 	{
 		try

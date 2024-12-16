@@ -4,6 +4,13 @@
 		<h1>Bem-Vindo ao YtMediaDownloader</h1>
 	</div>
 	<div class="card-body bg-gradient">
+		<!-- Loader -->
+		@if (_isLoading)
+		{
+			<div class="loader-overlay">
+				<div class="spinner"></div>
+			</div>
+		}
 		<div class="search-container">
 			<input type="text"
 				   @bind="_videoUrl"
@@ -42,12 +49,14 @@
 	private string _videoTitle = string.Empty;
 	private string _videoDuration = string.Empty;
 	private string _videoAuthor = string.Empty;
+	private bool _isLoading = false;
 	private YtDownloader _ytDowloader = new(PathHelper.GetBinariesFolder());
 
 	private async Task SearchVideo()
 	{
 		if (string.IsNullOrWhiteSpace(_videoUrl)) return;
 
+		_isLoading = true;
 		try
 		{
 			var videoInfo = await _ytDowloader.GetVideoInfo(_videoUrl);
@@ -62,13 +71,19 @@
 			_thumbnailUrl = string.Empty;
 			_videoTitle = _videoDuration = _videoAuthor = string.Empty;
 		}
+		finally
+		{
+			_isLoading = false;
+		}
 	}
 
 	private async Task DownloadVideo()
 	{
+		_isLoading = true;
 		try
 		{
 			_toastService.ShowInfo("O Download está sendo realizado");
+			if (!_ytDowloader.IsFFmpegPresent()) _toastService.ShowInfo("Baixando o FFmepg pela primeira vez, isto pode demorar um pouco");
 			var downloadPath = await Task.Run(async () =>
 			{
 				return await _ytDowloader.DownloadMediaAsync(_videoUrl, PathHelper.GetMediaFolder(), MediaType.VIDEO);
@@ -82,16 +97,21 @@
 		{
 			_toastService.ShowError($"Ocorreu um erro ao realizar o download {ex.Message}");
 		}
+		finally
+		{
+			_isLoading = false;
+		}
 	}
 
 	private async Task DownloadAudio()
 	{
+		_isLoading = true;
 		try
 		{
 			var downloadPath = await Task.Run(async () =>
 			{
 				return await _ytDowloader.DownloadMediaAsync(_videoUrl, PathHelper.GetMediaFolder(), MediaType.AUDIO);
-			}); 
+			});
 
 			_toastService.ShowSuccess("O Download foi realizado com sucesso");
 
@@ -100,6 +120,10 @@
 		catch (Exception)
 		{
 			_toastService.ShowError("Ocorreu um erro ao realizar o download");
+		}
+		finally
+		{
+			_isLoading = false;
 		}
 	}
 }
@@ -203,6 +227,5 @@
 		color: #999;
 		text-align: center;
 	}
-
 </style>
 <!-- #endregion -->
