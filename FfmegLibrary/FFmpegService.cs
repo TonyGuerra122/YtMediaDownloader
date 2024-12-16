@@ -16,6 +16,8 @@ public class FFmpegService
 		_ffmpegPath = Path.Combine(_ffmpegFolder, "ffmpeg.exe");
 	}
 
+	public bool IsFFmpegPresent() => FFmpegUtils.IsFfmpegPresent(_ffmpegPath);
+
 	public async Task JoinStreamsToFile(Stream videoStream, Stream audioStream, string outputFile)
 	{
 		string tempVideoPath = Path.Combine(_ffmpegFolder, "temp_video.mp4");

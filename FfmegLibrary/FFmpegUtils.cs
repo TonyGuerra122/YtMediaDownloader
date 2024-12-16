@@ -5,7 +5,7 @@ namespace FFmpegLibrary;
 
 internal static class FFmpegUtils
 {
-	private const string DOWNLOAD_FFMPEG_URL = "https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip";
+	private const string DOWNLOAD_FFMPEG_URL = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip";
 	private const string EXTRACTED_FOLDER_NAME = "ffmpeg-master-latest-win64-gpl";
 
 	public static bool IsFfmpegPresent(string ffmpegPath)
