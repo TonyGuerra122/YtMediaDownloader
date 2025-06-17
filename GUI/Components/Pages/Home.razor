@@ -1,4 +1,5 @@
 ﻿@page "/"
+
 <div class="card">
 	<div class="card-header bg-primary text-white">
 		<h1>Bem-Vindo ao YtMediaDownloader</h1>
@@ -32,8 +33,20 @@
 
 				<div class="download-options">
 					<button @onclick="DownloadVideo" class="download-button">Baixar Vídeo</button>
+					<button @onclick="PlayVideoInline" class="download-button">Reproduzir Vídeo</button>
 					<button @onclick="DownloadAudio" class="download-button">Baixar Áudio</button>
 				</div>
+
+				@if (_streams != null)
+				{
+					<video muted controls id="videoPlayer" style="width: 100%; max-width: 600px; margin-top: 20px;">
+						<source src="@_streams.VideoUrl" type="video/mp4">
+						Seu navegador não suporta o elemento de vídeo.
+					</video>
+					<audio controls id="audioPlayer" style="display:none">
+						<source src="@_streams.AudioUrl" type="audio/mp4">
+					</audio>
+				}
 			}
 			else
 			{
@@ -44,6 +57,8 @@
 </div>
 
 @code {
+	[Inject] private IJSRuntime? JS { get; set; }
+
 	private string _videoUrl = string.Empty;
 	private string _thumbnailUrl = string.Empty;
 	private string _videoTitle = string.Empty;
@@ -51,6 +66,8 @@
 	private string _videoAuthor = string.Empty;
 	private bool _isLoading = false;
 	private YtDownloader _ytDowloader = new(PathHelper.GetBinariesFolder());
+	private bool _shouldSync = false;
+	private MediaStream? _streams;
 
 	private async Task SearchVideo()
 	{
@@ -74,6 +91,7 @@
 		finally
 		{
 			_isLoading = false;
+			_streams = null;
 		}
 	}
 
@@ -124,6 +142,37 @@
 		finally
 		{
 			_isLoading = false;
+		}
+	}
+
+	private async Task PlayVideoInline()
+	{
+		_isLoading = true;
+		try
+		{
+			_streams = await _ytDowloader.GetDirectStreamUrl(_videoUrl);
+
+			_shouldSync = true;
+			
+			StateHasChanged();
+		}
+		catch (Exception ex)
+		{
+			_toastService.ShowError($"Ocorreu um erro ao reproduzir o vídeo: {ex.Message}");
+		}
+		finally
+		{
+			_isLoading = false;
+		}
+	}
+
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (_shouldSync && _streams != null)
+		{
+			_shouldSync = false;
+			await JS!.InvokeVoidAsync("syncVideoAndAudio", "videoPlayer", "audioPlayer");
 		}
 	}
 }

@@ -68,8 +68,37 @@ public class YtDownloader(string binFolder)
 		finally
 		{
 			videoStream?.Dispose();
-			audioStream?.Dispose();	
+			audioStream?.Dispose();
 		}
+	}
+
+	public async Task<MediaStream> GetDirectStreamUrl(string url)
+	{
+		var manifest = await _youtubeClient.Videos.Streams.GetManifestAsync(url);
+
+		var videoTask = Task.FromResult(manifest
+			.GetVideoStreams()
+			.Where(s => s.Container == Container.Mp4)
+			.GetWithHighestVideoQuality()
+		);
+
+		var audioTask = Task.FromResult(manifest
+			.GetAudioOnlyStreams()
+			.Where(s => s.Container == Container.Mp4)
+			.GetWithHighestBitrate()
+		);
+
+		await Task.WhenAll(videoTask, audioTask);
+
+		var videoStream = videoTask.Result;
+		var audioStream = audioTask.Result;
+
+		if (videoStream == null || audioStream == null)
+		{
+			throw new Exception("Não foi possível encontrar streams de vídeo ou áudio adequados.");
+		}
+
+		return new MediaStream(videoStream.Url, audioStream.Url);
 	}
 
 	public async Task<VideoInfo> GetVideoInfo(string url)
